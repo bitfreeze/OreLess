@@ -25,37 +25,43 @@ default-maximum-height: 127
 
 # Replacement rules. Here you can specify 
 rules:
-    - rule: flat-bedrock
-      label: 'No bedrock above level 0'
-      height: 1-4
-      block-from: BEDROCK
-      block-to: STONE
-      worlds: world
+    flat-bedrock:
+        label: 'No bedrock above level 0'
+        height: 1-4
+        block-from: BEDROCK
+        block-to: STONE
 
-    - rule: oreless
-      label: 'No ores on main world'
-      block-from: CLAY,COALORE,IRONORE,GOLDORE,DIAMONDORE,REDSTONEORE,GLOWINGREDSTONEORE
-      block-to: STONE
-      worlds: world
+    no-ores:
+        label: 'Remove all ores'
+        block-from: CLAY,COALORE,IRONORE,GOLDORE,DIAMONDORE,REDSTONEORE,GLOWINGREDSTONEORE
+        block-to: STONE
 
-    - rule: no-mobspawner
-      label: 'No spawners on main world'
-      block-from: MOSSSTONE,MOBSPAWNER
-      block-to: STONE
-      worlds: world
+    no-mines:
+        label: 'Remove structures from abandoned mines'
+        block-from: WOOD,FENCE,TORCH,WEB,CHEST,SOUL_SAND,RAILS
 
-    - rule: no-lapis
-      label: 'No lapis lazuli ore on guest world'
-      block-from: 21
-      worlds: guest
+    no-dungeons:
+        label: 'Remove dungeons and chests'
+        block-from: MOSSY_COBBLESTONE,MOB_SPAWNER,CHEST
+        block-to: STONE
 
-    - rule: no-glowstones
-      label: 'No glowstones on nether world'
-      block-from: GLOWSTONE
-      worlds: world_nether
+    dark-mines:
+        label: 'Remove torches from abandoned mines'
+        block-from: TORCH
 
-# List of worlds that will not be affected by OreLess
-ignore-worlds:
+    no-lapis:
+        label: 'No lapis lazuli ore'
+        block-from: 21
+        height: 0-32
+
+    no-glow:
+        label: 'Remove all glowstones'
+        block-from: GLOWSTONE
+
+worlds:
+    world: [flat-bedrock, no-ores, no-mines, no-dungeons]
+    world_nether:[no-glow]
+    guest: [no-lapis]
 
 # Here you can define the messages that will be logged/broadcasted.
 messages:
@@ -70,7 +76,8 @@ broadcast-messages: true
 # To grant all permissions to OP's, change this option to false.
 op-grant-all: true
 
-# Here you can customize the permission nodes as you wish.
+# Here you can customize the permission nodes.
 permissions:
     reload: 'oreless.reload'
-    receive-broadcasts: 'oreless.broadcasts'
+    command-help: 'oreless.help'
+    messages-receive: 'oreless.messages'

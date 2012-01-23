@@ -3,24 +3,9 @@ main: me.bitfreeze.OreLess.OreLess
 version: 0.1
 author: bitfreeze
 description: Getting rid of ores from the main world, to encouraging players to use a mining world instead.
+load: startup
 commands:
     oreless:
         aliases: [ol]
-        description: Main command
-        usage: /<command>
-    olset:
-        aliases: [orelessset,ols]
-        description: Adds OreLess to a world.
-        usage: /<command> set [world] [blockID1 [blockID2 [...]]]
-    olunset:
-        aliases: [olu]
-        description: Removes OreLess from a world.
-        usage: /<command> unset [world]
-    olenable:
-        aliases: [ole]
-        description: Enables OreLess.
-        usage: /<command> enable [world]
-    oldisable:
-        aliases: [old]
-        description: Temporarily disables OreLess.
-        usage: /<command> disable [world]
+        description: OreLess main command.
+        usage: /<command> help

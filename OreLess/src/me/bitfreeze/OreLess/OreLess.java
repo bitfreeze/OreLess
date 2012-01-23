@@ -1,13 +1,22 @@
 package me.bitfreeze.OreLess;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -16,15 +25,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
-public class OreLess extends JavaPlugin {
+public class OreLess extends JavaPlugin implements Listener {
 	public final  OreLess plugin = this;
 	public final Logger logger = Logger.getLogger("Minecraft");
 	public static String logPrefix;
 	public String version;
 	public static PermissionHandler permissionHandler;
 	public static boolean hasPermissions = false;
-	public final OreLessParameters parameters = new OreLessParameters(this);
-	public final OreLessWorldListener worldListener = new OreLessWorldListener(this);
+	private static HashMap<String, HashMap<Integer, Integer>> worldRules =
+			new HashMap<String, HashMap<Integer, Integer>>();
 	FileConfiguration config;
 
 	@Override
@@ -42,7 +51,7 @@ public class OreLess extends JavaPlugin {
 		loadConfig();
 
 		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvents(worldListener, this);
+		pm.registerEvents(this, this);
 	}
 
 	private void loadConfig() {
@@ -108,5 +117,67 @@ public class OreLess extends JavaPlugin {
 		//}
 
 		return false;
+	}
+
+	@EventHandler
+	public void chunkPopulated(ChunkPopulateEvent event) {
+		String worldName = event.getWorld().getName();
+		// Hard-coded, just for testing yet
+		if (worldName.equalsIgnoreCase("vast")) {
+			Chunk chunk = event.getChunk();
+			removeOres(event.getWorld(), chunk.getX(), chunk.getZ());
+		}
+	}
+
+	private void removeOres(World world, int cx, int cz) {
+		if(worldRules.containsKey(world.getName())) {
+			int replacementCount = 0;
+			HashMap<Integer, Integer> rules = worldRules.get(world.getName());
+			ChunkSnapshot chunk = world.getChunkAt(cx, cz).getChunkSnapshot();
+			int currentTypeId;
+			int newTypeId;
+			for (int y = 0; y <= 127; y++) {
+				for (int x = 0; x < 16; x++) {
+					for (int z = 0; z < 16; z++) {
+						currentTypeId = chunk.getBlockTypeId(cx * 16 + x, y, cz * 16 + z);
+						if (rules.containsKey(currentTypeId)) {
+							newTypeId = rules.get(currentTypeId);
+							Block block = world.getBlockAt(cx * 16 + x, y, cz * 16 + z);
+							block.setTypeId(newTypeId);
+							replacementCount++;
+						}
+					}
+				}
+			}
+
+			if (replacementCount > 0) {
+				// Broadcast message
+				if (replacementCount == 1) {
+					// ##Format & send message "one-block-replaced"
+				} else {
+					// ##Format & send message "many-blocks-replaced"
+				}
+
+				// Fix lighting, if possible and harmless
+				try {
+					net.minecraft.server.Chunk rawchunk = ((CraftChunk)chunk).getHandle();
+		            if (world.isChunkLoaded(cx - 1, cz - 1) &&
+		                world.isChunkLoaded(cx - 1, cz) &&
+		                world.isChunkLoaded(cx - 1, cz + 1) &&
+		                world.isChunkLoaded(cx, cz - 1) &&
+		                world.isChunkLoaded(cx, cz + 1) &&
+		                world.isChunkLoaded(cx + 1, cz - 1) &&
+		                world.isChunkLoaded(cx + 1, cz) &&
+		                world.isChunkLoaded(cx + 1, cz + 1))
+		            {
+		                rawchunk.initLighting();
+		            }
+				} catch(Exception e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				// ##Format & send message no-block-replaced
+			}
+		}
 	}
 }

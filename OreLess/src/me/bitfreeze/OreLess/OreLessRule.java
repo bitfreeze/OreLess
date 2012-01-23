@@ -4,16 +4,22 @@ import org.bukkit.Material;
 
 
 public class OreLessRule {
-	byte	typeId;
-	int		fromHeight;
-	int		thruHeight;
-	byte	replaceId;
+	private byte typeId;
+	int fromHeight;
+	int thruHeight;
+	byte blockTo;
 
 	OreLessRule(byte typeId, int fromHeight, int thruHeight, byte replaceId) {
 		this.typeId		= typeId;
 		this.fromHeight	= fromHeight;
 		this.thruHeight	= thruHeight;
 		this.typeId		= replaceId;
+	}
+
+	int replace(int typeId) {
+		int newBlock = Material.AIR.getId();
+		// Here goes the logic to verify if the block must be replaced.
+		return newBlock;
 	}
 
 	public static OreLessRule newItem(String text) {
