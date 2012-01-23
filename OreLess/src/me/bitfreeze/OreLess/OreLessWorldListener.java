@@ -5,17 +5,20 @@ import java.util.Arrays;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkPopulateEvent;
-import org.bukkit.event.world.WorldListener;
 
-public class OreLessWorldListener extends WorldListener {
+public class OreLessWorldListener implements Listener {
 	OreLess plugin;
 
 	OreLessWorldListener(OreLess plugin) {
 		this.plugin = plugin;
 	}
 
-	public void onChunkPopulate(ChunkPopulateEvent event) {
+	@EventHandler
+	public void chunkPopulated(ChunkPopulateEvent event) {
 		String worldName = event.getWorld().getName();
 		// Hard-coded, just for testing yet
 		if (worldName.equalsIgnoreCase("vast")) {
@@ -24,28 +27,29 @@ public class OreLessWorldListener extends WorldListener {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	private void removeOres(World world, int cx, int cz) {
-		Chunk 			chunk;
-		ChunkSnapshot 	chunkSnapshot;
-		int 			blocksReplaced		= 0;
-		int 			blockTypeId;
+		Chunk chunk;
+		ChunkSnapshot chunkSnapshot;
+		int blocksReplaced = 0;
+		int blockTypeId;
+		boolean unloadChunk = false;
 
 		if (!world.isChunkLoaded(cx, cz)) {
 			if (!world.isChunkLoaded(cx, cz)) {
 				world.loadChunk(cx, cz);
+				unloadChunk = true;
 			}
 		}
 		chunk = world.getChunkAt(cx, cz);
 		chunkSnapshot = chunk.getChunkSnapshot();
 
 		// For performance, build a vector that defines all the Y positions to process.
-		OreLessItem[] replacements = plugin.parameters.getParameters(world);
+		OreLessRule[] rules = plugin.parameters.getParameters(world);
 		boolean process[] = new boolean[128];
 		Arrays.fill(process, false);
 
-		for(OreLessItem replacement : replacements) {
-			Arrays.fill(process, replacement.fromHeight, replacement.thruHeight + 1, true);
+		for(OreLessRule rule : rules) {
+			Arrays.fill(process, rule.fromHeight, rule.thruHeight + 1, true);
 		}
 
 		for (int x = 0; x < 16; x++) {
@@ -55,11 +59,11 @@ public class OreLessWorldListener extends WorldListener {
 						// Check if the block at these coordinates is unwanted.
 						// In this starting version, coal/iron/gold/diamond/lapis.
 						blockTypeId = chunkSnapshot.getBlockTypeId(x, y, z);
-						for(OreLessItem replacement : replacements) {
-							if ((replacement.fromHeight <= y) && (replacement.thruHeight <= y)) {
-								if (blockTypeId == replacement.typeId) {
+						for(OreLessRule rule : rules) {
+							if ((rule.fromHeight <= y) && (rule.thruHeight <= y)) {
+								if (blockTypeId == rule.typeId) {
 									// Unwanted  block found. Replace it by the given block.
-									chunk.getBlock(x, y, z).setTypeId(replacement.replaceId);
+									chunk.getBlock(x, y, z).setTypeId(rule.replaceId);
 									blocksReplaced++;
 									break;
 								}
@@ -71,6 +75,9 @@ public class OreLessWorldListener extends WorldListener {
 		}
 		if (blocksReplaced > 0) {
 			plugin.logger.info(OreLess.logPrefix + blocksReplaced + " blocks replaced at chunk (" + cx + "," + cz + ").");
+		}
+		if (unloadChunk) {
+			world.unloadChunk(cx, cz);
 		}
 	}
 }

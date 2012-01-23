@@ -5,15 +5,15 @@ import java.util.HashMap;
 import org.bukkit.World;
 
 public class OreLessParameters {
-	private OreLess							plugin;
-	private HashMap<World, String>			worldParameters			= new HashMap<World, String>();
-	private HashMap<World, OreLessItem[]>	worldItemReplacements	= new HashMap<World, OreLessItem[]>();
+	private OreLess plugin;
+	private HashMap<World, String> worldParameters = new HashMap<World, String>();
+	private HashMap<World, OreLessRule[]> worldItemReplacements = new HashMap<World, OreLessItem[]>();
 
 	OreLessParameters(OreLess plugin) {
 		this.plugin = plugin;
 	}
 
-	public OreLessItem[] getParameters(World world) {
+	public OreLessRule[] getParameters(World world) {
 		if (worldParameters.containsKey(world)) {
 			return worldItemReplacements.get(world);
 		} else {
@@ -22,11 +22,11 @@ public class OreLessParameters {
 		}
 	}
 
-	public OreLessItem[] getParameters(World world, String parameters) {
-		ArrayList<OreLessItem>	repl			= new ArrayList<OreLessItem>();
-		OreLessItem[]			replacements	= null;
-		OreLessItem				replacement;
-		String[]				tokens;
+	public OreLessRule[] getParameters(World world, String parameters) {
+		ArrayList<OreLessRule> repl = new ArrayList<OreLessRule>();
+		OreLessRule[] replacements = null;
+		OreLessRule replacement;
+		String[] tokens;
 
 		// If the world has already been processed for these very same parameters,
 		// do not do it all again, just use the previously saved replacements.
@@ -43,13 +43,13 @@ public class OreLessParameters {
 		worldParameters.put(world, parameters);
 		tokens = parameters.split(",");
 		if (tokens.length < 1) {
-			OreLess.logger.info(OreLess.logPrefix + "Wrong parameters informed for world " + world.getName() + ":" + parameters);
+			plugin.logger.info(OreLess.logPrefix + "Wrong parameters informed for world " + world.getName() + ":" + parameters);
 			return null;
 		}
 		for(String parameter : tokens) {
 			replacement = OreLessItem.newItem(parameter);
 			if (replacement == (OreLessItem)null) {
-				OreLess.logger.info(OreLess.logPrefix + "Wrong parameter informed for world " + world.getName() + ": " + parameter);
+				plugin.logger.info(OreLess.logPrefix + "Wrong parameter informed for world " + world.getName() + ": " + parameter);
 			} else {
 				repl.add(replacement);
 			}

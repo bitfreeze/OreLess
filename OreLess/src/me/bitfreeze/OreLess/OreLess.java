@@ -1,8 +1,13 @@
 package me.bitfreeze.OreLess;
 
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.bukkit.event.Event;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -13,31 +18,65 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 public class OreLess extends JavaPlugin {
 	public final  OreLess plugin = this;
-	public static Logger logger = Logger.getLogger("Minecraft");
-    public static String logPrefix;
-    public String version;
-    public static PermissionHandler permissionHandler;
-    public static boolean hasPermissions = false;
+	public final Logger logger = Logger.getLogger("Minecraft");
+	public static String logPrefix;
+	public String version;
+	public static PermissionHandler permissionHandler;
+	public static boolean hasPermissions = false;
 	public final OreLessParameters parameters = new OreLessParameters(this);
-    public final OreLessWorldListener worldListener = new OreLessWorldListener(this);
+	public final OreLessWorldListener worldListener = new OreLessWorldListener(this);
+	FileConfiguration config;
 
-    @Override
-	public void onEnable() {
-		PluginDescriptionFile pdffile = this.getDescription();
-		logger.info(pdffile.getName() + " version " + pdffile.getVersion() + " is enabled.");
-		setupPermissions();
-    	logPrefix = "[" + pdffile.getName() + "] ";
-
-		PluginManager pm = this.getServer().getPluginManager();
-		pm.registerEvent(Event.Type.CHUNK_POPULATED, worldListener, Event.Priority.Normal, this);
-	}
-
-    @Override
+	@Override
 	public void onDisable() {
-		PluginDescriptionFile pdffile = this.getDescription();
-		logger.info(pdffile.getName() + " version " + pdffile.getVersion() + " is disabled.");
+		PluginDescriptionFile pdfFile = this.getDescription();
+		logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " is now disabled.");
 	}
 
+	@Override
+	public void onEnable() {
+		PluginDescriptionFile pdfFile = this.getDescription();
+		logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " is now enabled.");
+		logPrefix = "[" + pdfFile.getName() + "] ";
+		setupPermissions();
+		loadConfig();
+
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(worldListener, this);
+	}
+
+	private void loadConfig() {
+		try {
+			getDataFolder().mkdir();
+			config = this.getConfig();
+			// Define default values for missing options in the config.yml
+			if (!config.contains("default-replacement")) {
+				config.set("default-replacement", "AIR");
+			}
+			if (!config.contains("default-minimum-height")) {
+				config.set("default-minimum-height", 0);
+			}
+			if (!config.contains("default-maximum-height")) {
+				config.set("default-maximum-height", 127);
+			}
+
+			if (!config.contains("rules")) {
+				config.set("rules", null);
+			} else {
+				// Load the internal structure of replacements
+				List<Map<String, Object>> rules = config.getMapList("rules");
+				for(Map<String, Object> rule : rules) {
+					
+				}
+			}
+
+			if (!config.contains("ignore-worlds")) {
+				config.set("ignore-worlds", null);
+			}
+		} catch(Exception e1) {
+			e1.printStackTrace();
+		}
+	}
 
 	@SuppressWarnings("static-access")
 	private void setupPermissions() {
@@ -54,30 +93,20 @@ public class OreLess extends JavaPlugin {
 		}
 	}
 
-	//public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		//Player player = (Player) sender;
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		Player player = (Player) sender;
 
-		//if(label.equalsIgnoreCase("mchammer") || label.equalsIgnoreCase("mch")) {
-		//	if( (hasPermissions && permissionHandler.has(player, "bitcommands.mchammer")) || player.isOp()) {
-		//		log.info(logPrefix + "Can't Touch This! Player: " + player.getName() + ".");
-		//		player.sendMessage("--- CAN'T TOUCH THIS! ---");
-		//		player.performCommand("play yctt");
-		//		return true;
-		//	}
-		//}
-		//if( (hasPermissions && permissionHandler.has(player, "bitcommands.palette")) || player.isOp()) {
-		//	if(label.equalsIgnoreCase("palette")) {
-		//		String msgColors = "";
-		//		player.sendMessage(ChatColor.GRAY + "Color palette:");
-		//		for (ChatColor color : ChatColor.values()) {
-		//			msgColors = msgColors + color + "#";
-		//		}
-		//		player.sendMessage(msgColors);
-		//		player.sendMessage(ChatColor.GRAY + "0123456789abcdef");
-		//		return true;
-		//	}
+		//if(label.equalsIgnoreCase("oreless") || label.equalsIgnoreCase("ol")) {
+			if((args.length == 1) && (args[0].equalsIgnoreCase("reload"))) {
+				if( (hasPermissions && permissionHandler.has(player, config.getString("permissions.reload")))
+						|| (config.getBoolean("permissions.op-grant-all", true) && player.isOp()) ) {
+					loadConfig();
+					logger.info(logPrefix + "Configurations reloaded from file.");
+					return true;
+				}
+			}
 		//}
 
-		//return false;
-	//}
+		return false;
+	}
 }

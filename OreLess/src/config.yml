@@ -1,0 +1,76 @@
+#
+# OreLess' configuration file
+#
+# About editing this file:
+# - DO NOT USE TABS. You MUST use spaces or Bukkit will complain. If
+#   you use an editor like Notepad++ (recommended for Windows users), you
+#   must configure it to "replace tabs with spaces." In Notepad++, this can
+#   be changed in Settings > Preferences > Language Menu.
+# - Don't get rid of the indents. They are indented so some entries are
+#   in categories (like "no-change-made" is in the "messages" category.
+# - If you want to check the format of this file before putting it
+#   into WorldEdit, paste it into http://yaml-online-parser.appspot.com/
+#   and see if it gives "ERROR:".
+# - Lines starting with # are commentsand so they are ignored.
+#
+
+# Default block to replace unwanted blocks found. Either item ID or name
+default-replacement: AIR
+
+# Default Y level to start checking
+default-minimum-height: 0
+
+# Default Y level to end checking
+default-maximum-height: 127
+
+# Replacement rules. Here you can specify 
+rules:
+    - rule: flat-bedrock
+      label: 'No bedrock above level 0'
+      height: 1-4
+      block-from: BEDROCK
+      block-to: STONE
+      worlds: world
+
+    - rule: oreless
+      label: 'No ores on main world'
+      block-from: CLAY,COALORE,IRONORE,GOLDORE,DIAMONDORE,REDSTONEORE,GLOWINGREDSTONEORE
+      block-to: STONE
+      worlds: world
+
+    - rule: no-mobspawner
+      label: 'No spawners on main world'
+      block-from: MOSSSTONE,MOBSPAWNER
+      block-to: STONE
+      worlds: world
+
+    - rule: no-lapis
+      label: 'No lapis lazuli ore on guest world'
+      block-from: 21
+      worlds: guest
+
+    - rule: no-glowstones
+      label: 'No glowstones on nether world'
+      block-from: GLOWSTONE
+      worlds: world_nether
+
+# List of worlds that will not be affected by OreLess
+ignore-worlds:
+
+# Here you can define the messages that will be logged/broadcasted.
+messages:
+    no-block-replaced: ''
+    one-block-replaced: '&eOne &3unwanted block replaced at (&e%X&3,&e%Z&3).'
+    many-blocks-replaced: '&e%CHANGES &3unwanted blocks replaced at (&e%X&3,&e%Z&3).'
+
+# To show in-game messages set broadcast-messages to true.  Otherwise, the
+# messages will be logged on the console only.
+broadcast-messages: true
+
+# To grant all permissions to OP's, change this option to false.
+op-grant-all: true
+
+# Here you can customize the permission nodes as you wish.
+permissions:
+    reload: 'oreless.reload'
+    receive-broadcasts: 'oreless.broadcasts'

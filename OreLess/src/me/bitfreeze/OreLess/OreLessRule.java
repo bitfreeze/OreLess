@@ -3,20 +3,20 @@ package me.bitfreeze.OreLess;
 import org.bukkit.Material;
 
 
-public class OreLessItem {
+public class OreLessRule {
 	byte	typeId;
 	int		fromHeight;
 	int		thruHeight;
 	byte	replaceId;
 
-	OreLessItem(byte typeId, int fromHeight, int thruHeight, byte replaceId) {
+	OreLessRule(byte typeId, int fromHeight, int thruHeight, byte replaceId) {
 		this.typeId		= typeId;
 		this.fromHeight	= fromHeight;
 		this.thruHeight	= thruHeight;
 		this.typeId		= replaceId;
 	}
 
-	public static OreLessItem newItem(String text) {
+	public static OreLessRule newItem(String text) {
 		String		data[];
 		String		tokens[];
 		Material	mat;
@@ -77,6 +77,6 @@ public class OreLessItem {
 			replaceId = (byte)Material.STONE.getId();
 		}
 
-		return new OreLessItem(typeId, fromHeight, thruHeight, replaceId);
+		return new OreLessRule(typeId, fromHeight, thruHeight, replaceId);
 	}
 }
