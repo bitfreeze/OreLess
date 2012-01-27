@@ -1,0 +1,5 @@
+# In this file you can define the messages that will be logged/broadcasted for each event.
+invalid-block-to: 'Invalid block-to "%1". Using default (%2).'
+no-block-replaced: ''
+one-block-replaced: '&eOne &3unwanted block replaced at (&e%1&3,&e%2&3).'
+many-blocks-replaced: '&e%1 &3unwanted blocks replaced at (&e%2&3,&e%3&3).'

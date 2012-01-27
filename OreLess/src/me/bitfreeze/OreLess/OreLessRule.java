@@ -1,88 +1,47 @@
 package me.bitfreeze.OreLess;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.bukkit.Material;
 
 
 public class OreLessRule {
-	private byte typeId;
-	int fromHeight;
-	int thruHeight;
-	byte blockTo;
+	public String label;
+	public boolean[] activeHeight = new boolean[128];
+	public ArrayList<Integer> blockFrom = new ArrayList<Integer>();
+	public int blockTo;
+	public boolean fixLighting;
 
-	OreLessRule(byte typeId, int fromHeight, int thruHeight, byte replaceId) {
-		this.typeId		= typeId;
-		this.fromHeight	= fromHeight;
-		this.thruHeight	= thruHeight;
-		this.typeId		= replaceId;
-	}
+	OreLessRule(OreLess plugin, String label, String blockFromList, String height, String blockTo, boolean fixLighting) {
+		Material mat;
 
-	int replace(int typeId) {
-		int newBlock = Material.AIR.getId();
-		// Here goes the logic to verify if the block must be replaced.
-		return newBlock;
-	}
+		this.label = label;
 
-	public static OreLessRule newItem(String text) {
-		String		data[];
-		String		tokens[];
-		Material	mat;
-		byte		typeId;
-		int			fromHeight;
-		int			thruHeight;
-		byte		replaceId;
-
-		// TYPE/FROM/TO=REPLACE
-		data = text.split("=");
-		if ((data.length < 1) || (data.length > 2)) {
-			return null;
+		// Parse the list of source block types, building a proper list from it
+		String[] names = blockFromList.split(",");
+		for (String name : names) {
+			mat = Material.matchMaterial(name);
+			if (mat == null) {
+				plugin.logger.warning(plugin.logPrefix + "Invalid block-from \"" + name + "\".");
+			} else {
+				this.blockFrom.add(mat.getId());
+			}
 		}
 
-		tokens = data[0].split("-");
-		if ((tokens.length < 1) || (tokens.length > 4)) {
-			return null;
-		}
-		if (tokens[0].trim().isEmpty()) {
-			return null;
-		}
-		mat = Material.matchMaterial(tokens[0]);
+		// Parse the list of height ranges, building the activeHeight flag array
+		Arrays.fill(this.activeHeight, false);
+
+		// Parse the replacement block, for it may be a block name instead
+		mat = Material.matchMaterial(blockTo);
 		if (mat == null) {
-			return null;
-		}
-		typeId = (byte)mat.getId();
-		if (tokens.length >= 2) {
-			try {
-				fromHeight = Integer.parseInt(tokens[1]);
-			} catch(Exception e) {
-				return null;
-			}
-			if (tokens.length == 3) {
-				try {
-					thruHeight = Integer.parseInt(tokens[2]);
-				} catch(Exception e) {
-					return null;
-				}
-			} else {
-				thruHeight = fromHeight;
-			}
+			this.blockTo = plugin.defaultBlockTo;
+			plugin.logger.warning(plugin.logPrefix + "Invalid block-to \"" + blockTo + "\". Using default (" + Material.getMaterial(this.blockTo).toString() + ").");
 		} else {
-			fromHeight = 0;
-			thruHeight = 128;
+			this.blockTo = mat.getId();
 		}
 
-		if (data.length == 2) {
-			if (!data[1].trim().isEmpty()) {
-				mat = Material.matchMaterial(data[1]);
-				if (mat == null) {
-					return null;
-				}
-				replaceId = (byte)mat.getId();
-			} else {
-				replaceId = (byte)Material.STONE.getId();
-			}
-		} else {
-			replaceId = (byte)Material.STONE.getId();
-		}
-
-		return new OreLessRule(typeId, fromHeight, thruHeight, replaceId);
+		// Fix lighting in case of any changes?
+		this.fixLighting = fixLighting;
 	}
 }

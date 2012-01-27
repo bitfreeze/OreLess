@@ -14,14 +14,17 @@
 # - Lines starting with # are commentsand so they are ignored.
 #
 
-# Default block to replace unwanted blocks found. Either item ID or name
-default-replacement: AIR
+# Default parameters to all rules
+default:
+    # Default block to replace unwanted blocks found. Either item ID or name
+    block-to: AIR
 
-# Default Y level to start checking
-default-minimum-height: 0
+    # Default vertical range to check
+    height: 0-127
 
-# Default Y level to end checking
-default-maximum-height: 127
+    # Setting this as false will not fix lighting after the rules have been applied
+    fix-lighting: true
+
 
 # Replacement rules. Here you can specify 
 rules:
@@ -39,6 +42,7 @@ rules:
     no-mines:
         label: 'Remove structures from abandoned mines'
         block-from: WOOD,FENCE,TORCH,WEB,CHEST,SOUL_SAND,RAILS
+        fix-lighting: true
 
     no-dungeons:
         label: 'Remove dungeons and chests'
@@ -48,6 +52,7 @@ rules:
     dark-mines:
         label: 'Remove torches from abandoned mines'
         block-from: TORCH
+        fix-lighting: true
 
     no-lapis:
         label: 'No lapis lazuli ore'
@@ -57,17 +62,12 @@ rules:
     no-glow:
         label: 'Remove all glowstones'
         block-from: GLOWSTONE
+        fix-lighting: true
 
 worlds:
     world: [flat-bedrock, no-ores, no-mines, no-dungeons]
-    world_nether:[no-glow]
+    world_nether: [no-glow]
     guest: [no-lapis]
-
-# Here you can define the messages that will be logged/broadcasted.
-messages:
-    no-block-replaced: ''
-    one-block-replaced: '&eOne &3unwanted block replaced at (&e%X&3,&e%Z&3).'
-    many-blocks-replaced: '&e%CHANGES &3unwanted blocks replaced at (&e%X&3,&e%Z&3).'
 
 # To show in-game messages set broadcast-messages to true.  Otherwise, the
 # messages will be logged on the console only.
@@ -78,6 +78,7 @@ op-grant-all: true
 
 # Here you can customize the permission nodes.
 permissions:
-    reload: 'oreless.reload'
-    command-help: 'oreless.help'
     messages-receive: 'oreless.messages'
+    command-help: 'oreless.help'
+    command-apply: 'oreless.apply'
+    command-reload: 'oreless.reload'
